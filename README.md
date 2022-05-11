@@ -1,2 +1,2 @@
-# json-web-counter
+# JSON web counter
 Simple running tally of the number of visits a webpage has received.
