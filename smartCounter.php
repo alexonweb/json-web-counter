@@ -1,4 +1,8 @@
 <?php
+/*
+ * JSON Web Counter
+ * 
+ */
 
 class SmartCounter 
 {
