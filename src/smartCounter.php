@@ -1,19 +1,18 @@
 <?php
-/*
- * JSON Web Counter
- * 
- */
 
-class SmartCounter 
+namespace FriendlyWeb;
+
+class SmartCounter
 {
 
-    private $statisticsFilePath = 'smartstat.json';
+    private $statisticsFilePath = 'user/smartcounter.json';
     private $statistics = null;
     private $datenow = null;
-    private $domainname = null;
+    private $domainname = null; 
     private $options = array(
-        'sq' => 50
+        'sq' => 360
     );
+
 
     public function __construct()
     {
@@ -22,6 +21,7 @@ class SmartCounter
 
     }
 
+    // 
     private function setDatenow()
     {
 
@@ -29,7 +29,8 @@ class SmartCounter
 
     }
 
-    private function dataInitial() 
+    // 
+    private function dataInitial()
     {
 
         if ( !file_exists( $this->statisticsFilePath ) ) {
@@ -44,12 +45,13 @@ class SmartCounter
 
     }
 
+    // 
     private function createSkeleton()
     {
 
         $this->setDatenow();
 
-        $ymdall = array ('Y' => null, 'm' => null, 'd' => null, 'all' => null);
+        $ymdall = array('Y' => null, 'm' => null, 'd' => null, 'all' => null);
 
         $sq = '';
 
@@ -59,35 +61,52 @@ class SmartCounter
 
         }
 
-        $skeleton = array(
-            'date'      => $this->datenow,
+        $common = array( 
             'hits'      => $ymdall,
             'hosts'     => $ymdall,
             'sq'        => $sq);
 
-        return json_encode( $skeleton );
+        $skeleton = array(
+            'date'      => $this->datenow,
+            'common'    => $common);
+
+        return json_encode($skeleton);
 
     }
 
-    public function getStatistics($req)
+    // hook for updating
+    private function resourceIdentifier()
     {
 
-        $this->dataInitial();
+        $uri = urldecode($_SERVER['REQUEST_URI']);
+
+        $uri = substr($uri, 1); // Remove slash at the start of the line
+
+        if ($uri == '') {
+
+            return 'common';
+
+        } else {
+
+            return $uri;
+
+        }
 
     }
 
-    public function counter()
+    // 
+    public function count()
     {
 
         $this->dataInitial();
 
         $statistics = json_decode($this->statistics);
 
-        $sm_date = (int)$statistics->date;
+        $lastdate = (int)$statistics->date;
 
-        if (isset($_COOKIE["visit"])) {
+        if (isset($_COOKIE["smartcounter"])) {
 
-            $datecookie = (int)$_COOKIE["visit"];
+            $datecookie = (int)$_COOKIE["smartcounter"];
 
         }
 
@@ -95,9 +114,11 @@ class SmartCounter
 
         foreach ($dstrfrmt as $datestr) {
 
-            if (date("$datestr", $this->datenow) == date("$datestr", $sm_date)) {
+            if (date("$datestr", $this->datenow) == date("$datestr", $lastdate)) {
 
-                $statistics->hits->$datestr++;
+                $statistics->common->hits->$datestr++;
+
+                // hook for updating
 
             } else {
 
@@ -111,9 +132,11 @@ class SmartCounter
 
                     if ($mark) {
 
-                        $statistics->hosts->$datestrsec = 1;
+                        $statistics->common->hosts->$datestrsec = 1;
+                        
+                        $statistics->common->hits->$datestrsec = 1;
 
-                        $statistics->hits->$datestrsec = 1;
+                        // hook for updating
 
                     }
 
@@ -127,35 +150,44 @@ class SmartCounter
 
                 if ( (date("$datestr", $this->datenow) != date("$datestr", $datecookie)) ) {
 
-                    $statistics->hosts->$datestr++;
+                    $statistics->common->hosts->$datestr++;
+
+                    // hook for updating
 
                 }
 
             } else {
 
-                $statistics->hosts->$datestr++;
+                $statistics->common->hosts->$datestr++;
+
+                // hook for updating
 
             }
 
         }
 
-        $statistics->hits->all++;
+        $statistics->common->hits->all++;
+
+        // hook for updating
 
     	if ( !isset($datecookie) ) {
 
-            $statistics->hosts->all++;
+            $statistics->common->hosts->all++;
 
         }
 
-        $sq_days = 50;
 
-        $sq_arr = explode(";", $statistics->sq);
+        // Subsequence 
+
+        $sq_days = $this->options['sq']; // hook for updating
+
+        $sq_arr = explode(";", $statistics->common->sq);
 
         reset($sq_arr);
 
         $mark = false;
 
-        if ($this->datenow == $sm_date) {
+        if ($this->datenow == $lastdate) {
 
             if (isset($datecookie)) {
 
@@ -173,7 +205,7 @@ class SmartCounter
 
         } else {
 
-            $zerodays = (int)( ($this->datenow - $sm_date) /(3600*24) );
+            $zerodays = (int)( ($this->datenow - $lastdate) /(3600*24) );
 
             if ($zerodays >= $sq_days) {
 
@@ -205,31 +237,35 @@ class SmartCounter
 
         if ($mark) {
 
-            $sq_arr[$sq_lastkey] = $statistics->hosts->d;
+            $sq_arr[$sq_lastkey] = $statistics->common->hosts->d;
+
+            // hook for updating
 
         }
 
-        $statistics->sq = "";
+        $statistics->common->sq = "";
 
         foreach ($sq_arr as $sq_key => $sq_value ) {
 
-          $statistics->sq .= $sq_value;
+          $statistics->common->sq .= $sq_value;
 
             if ($sq_key != $sq_lastkey) {
 
-                $statistics->sq .= ";";
+                $statistics->common->sq .= ";";
 
             }
 
         }
 
+        // Subsequences end
+
         $this->setDatenow();
 
         $statistics->date = $this->datenow;
 
-        $domainname = $_SERVER['SERVER_NAME'];
+        $domainname = $_SERVER['SERVER_NAME']; // bug with 'localhost'
 
-        setcookie ('visit', $this->datenow, time()+87091200, '/', ".$domainname");
+        setcookie ('smartcounter', $this->datenow, time()+87091200, '/', ".$domainname");
 
         $jsondata = json_encode($statistics);
 
@@ -238,7 +274,6 @@ class SmartCounter
     }
 
 }
-
 
 
 
