@@ -273,6 +273,18 @@ class SmartCounter
 
     }
 
+    // 
+    public function getStats($page = 'common', $type = 'hits', $period = 'all')
+    {
+
+        $this->dataInitial();
+
+        $statistics = json_decode($this->statistics);
+
+        return $statistics->$page->$type->$period;
+
+    }
+
 }
 
 
