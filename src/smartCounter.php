@@ -2,286 +2,187 @@
 
 namespace FriendlyWeb;
 
+use DateTime;
+
 class SmartCounter
 {
 
     private $statisticsFilePath = 'user/smartcounter.json';
     private $statistics = null;
     private $datenow = null;
-    private $domainname = null; 
-    private $options = array(
-        'sq' => 360
-    );
 
 
     public function __construct()
     {
 
+        $this->setDatenow();
+
         $this->dataInitial();
 
     }
 
-    // 
     private function setDatenow()
     {
 
-        $this->datenow = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
+        $this->datenow = new DateTime('NOW');
 
     }
 
-    // 
     private function dataInitial()
     {
 
         if ( !file_exists( $this->statisticsFilePath ) ) {
 
-            $this->statistics = $this->createSkeleton();
+            $this->statistics = (object) $this->createSkeleton();
 
         } else {
 
-            $this->statistics = file_get_contents($this->statisticsFilePath);
+            $this->statistics = json_decode( file_get_contents($this->statisticsFilePath) );
 
         }
 
     }
 
-    // 
+    /**
+     * Understanding Skeleton
+     * 
+     * date - date of last editing data file
+     * common
+     *  hits -  array as a sequence of days
+     *  hosts - array as a sequence of days
+     */
     private function createSkeleton()
     {
-
-        $this->setDatenow();
-
-        $ymdall = array('Y' => null, 'm' => null, 'd' => null, 'all' => null);
-
-        $sq = '';
-
-        for ($i=0; $i < $this->options['sq']; $i++) {
-
-            $sq .= '0;';
-
-        }
+    
+        $sq = array(0);
 
         $common = array( 
-            'hits'      => $ymdall,
-            'hosts'     => $ymdall,
-            'sq'        => $sq);
+            'hits'      => $sq,
+            'hosts'     => $sq);
 
         $skeleton = array(
-            'date'      => $this->datenow,
-            'common'    => $common);
+            'date'      => $this->datenow->format('Y-m-d'),
+            'common'    => (object)$common);
 
-        return json_encode($skeleton);
+        return $skeleton;
 
     }
 
-    // hook for updating
-    private function resourceIdentifier()
+    /**
+     * Fill 0 values of the days before the current date
+     * 
+     * $sq - array
+     * $startdate - DateTime object
+     * 
+     * return Array 
+     */
+    private function subsequence ( $sq, $startdate )
     {
 
-        $uri = urldecode($_SERVER['REQUEST_URI']);
+        // $days = $this->datenow->diff($startdate)->format("%a");
+        $days = $this->daysBefore($startdate);
 
-        $uri = substr($uri, 1); // Remove slash at the start of the line
+        for ($i=0; $i<$days; $i++) {
 
-        if ($uri == '') {
-
-            return 'common';
-
-        } else {
-
-            return $uri;
+            $sq[] = 0;
 
         }
 
+        return $sq;
+
     }
 
-    // 
+    /**
+     * Days before the current date
+     * $lastdate - DateTime object
+     */ 
+    private function daysBefore($lastdate)
+    {
+
+        $days = $this->datenow->diff($lastdate)->format("%a");
+
+        return $days;
+
+    }
+
+    public function addTolastOne($sq) 
+    {
+
+        end($sq);
+
+        $key = key($sq);
+
+        $sq[$key]++;
+
+        return $sq;
+
+    }
+
+
+    /**
+     * 
+     */
     public function count()
     {
 
-        $this->dataInitial();
+        $lastdate = new DateTime($this->statistics->date);
 
-        $statistics = json_decode($this->statistics);
+        // HITS
 
-        $lastdate = (int)$statistics->date;
+        $sq = $this->statistics->common->hits;
 
-        if (isset($_COOKIE["smartcounter"])) {
+        $sq = $this->subsequence($sq, $lastdate);
 
-            $datecookie = (int)$_COOKIE["smartcounter"];
+        $sq = $this->addTolastOne($sq);
 
-        }
+        $this->statistics->common->hits = $sq;
 
-        $dstrfrmt = array ("Y", "m", "d");
+        // HOSTS
 
-        foreach ($dstrfrmt as $datestr) {
+        $sq = $this->statistics->common->hosts;
 
-            if (date("$datestr", $this->datenow) == date("$datestr", $lastdate)) {
+        $sq = $this->subsequence($sq, $lastdate);
 
-                $statistics->common->hits->$datestr++;
+        if ( isset($_COOKIE["smartcounter"]) ) {
 
-                // hook for updating
+            $datecookie = $_COOKIE["smartcounter"];
 
-            } else {
+            $datecookie = new DateTime($datecookie); // @todo check data
 
-                foreach ($dstrfrmt as $datestrsec ) {
+            $days = $this->daysBefore($datecookie);
 
-                    if ($datestrsec == $datestr) {
-
-                        $mark = true;
-
-                    }
-
-                    if ($mark) {
-
-                        $statistics->common->hosts->$datestrsec = 1;
-                        
-                        $statistics->common->hits->$datestrsec = 1;
-
-                        // hook for updating
-
-                    }
-
-                }
-
-                break;
-
+            if ($days != 0) {
+                
+                $sq = $this->addTolastOne($sq);
             }
-
-            if ( isset($datecookie) ) {
-
-                if ( (date("$datestr", $this->datenow) != date("$datestr", $datecookie)) ) {
-
-                    $statistics->common->hosts->$datestr++;
-
-                    // hook for updating
-
-                }
-
-            } else {
-
-                $statistics->common->hosts->$datestr++;
-
-                // hook for updating
-
-            }
-
-        }
-
-        $statistics->common->hits->all++;
-
-        // hook for updating
-
-    	if ( !isset($datecookie) ) {
-
-            $statistics->common->hosts->all++;
-
-        }
-
-
-        // Subsequence 
-
-        $sq_days = $this->options['sq']; // hook for updating
-
-        $sq_arr = explode(";", $statistics->common->sq);
-
-        reset($sq_arr);
-
-        $mark = false;
-
-        if ($this->datenow == $lastdate) {
-
-            if (isset($datecookie)) {
-
-                if ($this->datenow != $datecookie) {
-
-                    $mark = true;
-
-                }
-
-    		} else {
-
-                $mark = true;
-
-    		}
 
         } else {
 
-            $zerodays = (int)( ($this->datenow - $lastdate) /(3600*24) );
-
-            if ($zerodays >= $sq_days) {
-
-                foreach ($sq_arr as $sq_key => $sq_value) {
-
-                    $sq_arr[$sq_key] = 0; 
-
-                };
-
-            } else {
-
-                for ($i=0; $i < $zerodays; $i++) {
-
-                    $sq_arr[] = 0;
-
-                }
-
-                $sq_arr = array_slice($sq_arr, $zerodays);
-
-            }
-
-            $mark = true;
+            $sq = $this->addTolastOne($sq);
 
         }
 
-        end($sq_arr); 
+        $this->statistics->common->hosts = $sq;
 
-        $sq_lastkey = key($sq_arr);
 
-        if ($mark) {
-
-            $sq_arr[$sq_lastkey] = $statistics->common->hosts->d;
-
-            // hook for updating
-
-        }
-
-        $statistics->common->sq = "";
-
-        foreach ($sq_arr as $sq_key => $sq_value ) {
-
-          $statistics->common->sq .= $sq_value;
-
-            if ($sq_key != $sq_lastkey) {
-
-                $statistics->common->sq .= ";";
-
-            }
-
-        }
-
-        // Subsequences end
-
-        $this->setDatenow();
-
-        $statistics->date = $this->datenow;
+        // 
+        $this->statistics->date = $this->datenow->format('Y-m-d');
 
         $domainname = $_SERVER['SERVER_NAME']; // bug with 'localhost'
 
-        setcookie ('smartcounter', $this->datenow, time()+87091200, '/', ".$domainname");
+        setcookie ('smartcounter', $this->statistics->date, time()+87091200, '/', ".$domainname");
 
-        $jsondata = json_encode($statistics);
+        $jsondata = json_encode($this->statistics);
 
         file_put_contents($this->statisticsFilePath, $jsondata);
 
     }
 
-    // 
-    public function getStats($page = 'common', $type = 'hits', $period = 'all')
+    // Raw statistics
+    public function rawStats()
     {
 
-        $this->dataInitial();
-
-        $statistics = json_decode($this->statistics);
-
-        return $statistics->$page->$type->$period;
+        return $this->statistics;
 
     }
 
