@@ -8,8 +8,10 @@ class SmartCounter
 {
 
     private $statisticsFilePath = 'user/smartcounter.json';
+
     private $statistics = null;
     private $datenow = null;
+    private $cookiedate = null;
 
 
     public function __construct()
@@ -28,16 +30,17 @@ class SmartCounter
 
     }
 
+    // Return Object
     private function dataInitial()
     {
 
-        if ( !file_exists( $this->statisticsFilePath ) ) {
+        if ( file_exists( $this->statisticsFilePath ) ) {
 
-            $this->statistics = (object) $this->createSkeleton();
+            $this->statistics = json_decode( file_get_contents($this->statisticsFilePath), false );
 
         } else {
 
-            $this->statistics = json_decode( file_get_contents($this->statisticsFilePath) );
+            $this->statistics = (object) $this->createSkeleton();
 
         }
 
@@ -93,7 +96,7 @@ class SmartCounter
     }
 
     /**
-     * Days before the current date
+     * Days before the CURRENT date
      * $lastdate - DateTime object
      */ 
     private function daysBefore($lastdate)
@@ -143,14 +146,12 @@ class SmartCounter
 
         $sq = $this->subsequence($sq, $lastdate);
 
-        if ( isset($_COOKIE["smartcounter"]) ) {
+        $this->GetCookie();
 
-            $datecookie = $_COOKIE["smartcounter"];
+        if ($this->cookiedate !== null) {
 
-            $datecookie = new DateTime($datecookie); // @todo check data
-
-            $days = $this->daysBefore($datecookie);
-
+            $days = $this->daysBefore($this->cookiedate);
+            
             if ($days != 0) {
                 
                 $sq = $this->addTolastOne($sq);
@@ -164,19 +165,62 @@ class SmartCounter
 
         $this->statistics->common->hosts = $sq;
 
+        // new date
 
-        // 
         $this->statistics->date = $this->datenow->format('Y-m-d');
+
+        $this->SetCookie();
+
+        $this->putJSONtoFile();
+
+    }
+
+
+    //
+    private function SetCookie() 
+    {
 
         $domainname = $_SERVER['SERVER_NAME']; // bug with 'localhost'
 
         setcookie ('smartcounter', $this->statistics->date, time()+87091200, '/', ".$domainname");
 
-        $jsondata = json_encode($this->statistics);
+    }
 
-        file_put_contents($this->statisticsFilePath, $jsondata);
+    //
+    private function GetCookie()
+    {
+
+        if ( isset($_COOKIE["smartcounter"]) ) {
+
+            $datecookie = $_COOKIE["smartcounter"];
+
+            if ($this->verifyDate($datecookie)) {
+
+                $this->cookiedate = new DateTime($datecookie);
+
+            } else {
+                // wrong cookie date format
+            }
+
+        }
 
     }
+
+    private function verifyDate($date)
+    {
+
+        return (DateTime::createFromFormat('Y-m-d', $date) !== false);
+
+    }
+
+    private function putJSONtoFile()
+    {
+
+        file_put_contents( $this->statisticsFilePath, json_encode($this->statistics) );
+
+    }
+
+
 
     // Raw statistics
     public function rawStats()
