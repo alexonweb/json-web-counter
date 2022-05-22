@@ -199,7 +199,7 @@ class SmartCounter
                 $this->cookiedate = new DateTime($datecookie);
 
             } else {
-                // wrong cookie date format
+                // wrong cookie date format 
             }
 
         }
