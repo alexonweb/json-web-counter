@@ -1,4 +1,7 @@
 <?php
+/**
+ * 
+ */
 
 namespace FriendlyWeb;
 
@@ -17,23 +20,22 @@ class SmartCounter
     public function __construct()
     {
 
-        $this->setDatenow();
+        $this->setCurrentDate();
 
-        $this->dataInitial();
+        $this->getStatsData();
 
-        $this->upToDateStatistics();
+        $this->updateStatsData();
 
     }
 
-    private function setDatenow()
+    private function setCurrentDate()
     {
 
         $this->datenow = new DateTime('NOW');
 
     }
 
-    // Return Object
-    private function dataInitial()
+    private function getStatsData()
     {
 
         if ( file_exists( $this->statisticsFilePath ) ) {
@@ -58,7 +60,7 @@ class SmartCounter
      */
     private function createSkeleton()
     {
-    
+
         $sq = array(0);
 
         $common = array( 
@@ -77,7 +79,6 @@ class SmartCounter
      * Fill 0 values of the days before the current date
      * 
      * $sq - array
-     * $startdate - DateTime object
      * 
      * return Array 
      */
@@ -102,10 +103,10 @@ class SmartCounter
      * Days before the CURRENT date
      * $lastdate - DateTime object
      */ 
-    private function daysBefore($lastdate)
+    private function daysBefore($startdate)
     {
 
-        $days = $this->datenow->diff($lastdate)->format("%a");
+        $days = $this->datenow->diff($startdate)->format("%a");
 
         return $days;
 
@@ -124,20 +125,17 @@ class SmartCounter
 
     }
 
-    private function upToDateStatistics()
+    private function updateStatsData()
     {
 
-        $sq = $this->statistics->common->hits;
-        
-        $sq = $this->subsequence($sq);
+        $hh = array("hits", "hosts");
 
-        $this->statistics->common->hits = $sq;
+        foreach ($hh as $h) {
 
-        $sq = $this->statistics->common->hosts;
+            $this->statistics->common->$h = 
+                $this->subsequence( $this->statistics->common->$h );
 
-        $sq = $this->subsequence($sq);
-
-        $this->statistics->common->hosts = $sq;
+        }
 
         $this->statistics->date = $this->datenow->format('Y-m-d');
 
@@ -150,17 +148,16 @@ class SmartCounter
     public function count()
     {
 
-        $this->GetCookie();
 
         $this->statistics->common->hits = $this->addTolastOne( $this->statistics->common->hits );
-
-        // hosts
         
+        // Hosts count - begin
+
+        $this->getCookie();
+
         $sq = $this->statistics->common->hosts;
 
         if ($this->cookiedate !== null) {
-
-//            $days = $this->daysBefore($this->cookiedate);
             
             if ( $this->daysBefore($this->cookiedate) != 0) {
                 
@@ -175,19 +172,15 @@ class SmartCounter
 
         $this->statistics->common->hosts = $sq;
 
-        // new date
+        // Hosts count - end
 
-        $this->statistics->date = $this->datenow->format('Y-m-d');
-
-        $this->SetCookie();
+        $this->setCookie();
 
         $this->putJSONtoFile();
 
     }
 
-
-    //
-    private function SetCookie()
+    private function setCookie()
     {
 
         $domainname = $_SERVER['SERVER_NAME']; // bug with 'localhost'
@@ -196,8 +189,7 @@ class SmartCounter
 
     }
 
-    //
-    private function GetCookie()
+    private function getCookie()
     {
 
         if ( isset($_COOKIE["smartcounter"]) ) {
@@ -229,8 +221,6 @@ class SmartCounter
         file_put_contents( $this->statisticsFilePath, json_encode($this->statistics) );
 
     }
-
-
 
     // Raw statistics
     public function rawStats()
