@@ -21,6 +21,8 @@ class SmartCounter
 
         $this->dataInitial();
 
+        $this->upToDateStatistics();
+
     }
 
     private function setDatenow()
@@ -79,10 +81,11 @@ class SmartCounter
      * 
      * return Array 
      */
-    private function subsequence ( $sq, $startdate )
+    private function subsequence ( $sq )
     {
 
-        // $days = $this->datenow->diff($startdate)->format("%a");
+        $startdate = new DateTime($this->statistics->date);
+
         $days = $this->daysBefore($startdate);
 
         for ($i=0; $i<$days; $i++) {
@@ -121,6 +124,25 @@ class SmartCounter
 
     }
 
+    private function upToDateStatistics()
+    {
+
+        $sq = $this->statistics->common->hits;
+        
+        $sq = $this->subsequence($sq);
+
+        $this->statistics->common->hits = $sq;
+
+        $sq = $this->statistics->common->hosts;
+
+        $sq = $this->subsequence($sq);
+
+        $this->statistics->common->hosts = $sq;
+
+        $this->statistics->date = $this->datenow->format('Y-m-d');
+
+    }
+
 
     /**
      * 
@@ -128,31 +150,19 @@ class SmartCounter
     public function count()
     {
 
-        $lastdate = new DateTime($this->statistics->date);
-
-        // HITS
-
-        $sq = $this->statistics->common->hits;
-
-        $sq = $this->subsequence($sq, $lastdate);
-
-        $sq = $this->addTolastOne($sq);
-
-        $this->statistics->common->hits = $sq;
-
-        // HOSTS
-
-        $sq = $this->statistics->common->hosts;
-
-        $sq = $this->subsequence($sq, $lastdate);
-
         $this->GetCookie();
+
+        $this->statistics->common->hits = $this->addTolastOne( $this->statistics->common->hits );
+
+        // hosts
+        
+        $sq = $this->statistics->common->hosts;
 
         if ($this->cookiedate !== null) {
 
-            $days = $this->daysBefore($this->cookiedate);
+//            $days = $this->daysBefore($this->cookiedate);
             
-            if ($days != 0) {
+            if ( $this->daysBefore($this->cookiedate) != 0) {
                 
                 $sq = $this->addTolastOne($sq);
             }
@@ -177,7 +187,7 @@ class SmartCounter
 
 
     //
-    private function SetCookie() 
+    private function SetCookie()
     {
 
         $domainname = $_SERVER['SERVER_NAME']; // bug with 'localhost'
