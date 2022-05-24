@@ -1,5 +1,10 @@
 <?php
 /**
+ * SmartCounter 0.2.4 alpha
+ * 
+ * Alexander Dalle dalle@criptext.com 
+ * 
+ * Simple JSON based webcounter
  * 
  */
 
@@ -147,7 +152,6 @@ class SmartCounter
      */
     public function count()
     {
-
 
         $this->statistics->common->hits = $this->addTolastOne( $this->statistics->common->hits );
         
