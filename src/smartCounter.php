@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.2.4 alpha
+ * SmartCounter 0.2.5 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -155,32 +155,39 @@ class SmartCounter
 
         $this->statistics->common->hits = $this->addTolastOne( $this->statistics->common->hits );
         
-        // Hosts count - begin
+        if ( $this->isNewVisitor() ) {
 
-        $this->getCookie();
-
-        $sq = $this->statistics->common->hosts;
-
-        if ($this->cookiedate !== null) {
-            
-            if ( $this->daysBefore($this->cookiedate) != 0) {
-                
-                $sq = $this->addTolastOne($sq);
-            }
-
-        } else {
-
-            $sq = $this->addTolastOne($sq);
+            $this->statistics->common->hosts = $this->addTolastOne( $this->statistics->common->hosts );
 
         }
-
-        $this->statistics->common->hosts = $sq;
-
-        // Hosts count - end
 
         $this->setCookie();
 
         $this->putJSONtoFile();
+
+    }
+
+    private function isNewVisitor()
+    {
+
+        $this->getCookie();
+
+        if ($this->cookiedate !== null) {
+            
+            if ( $this->daysBefore($this->cookiedate) != 0) {
+
+                return true;
+
+            } else {
+
+                return false;
+            }
+
+        } else {
+
+            return true;
+
+        }
 
     }
 
