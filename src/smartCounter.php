@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.2.5 alpha
+ * SmartCounter 0.2.5.1 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -16,11 +16,6 @@ class SmartCounter
 {
 
     private $statisticsFilePath = 'user/smartcounter.json';
-
-    private $statistics = null;
-    private $datenow = null;
-    private $cookiedate = null;
-
 
     public function __construct()
     {
@@ -146,10 +141,6 @@ class SmartCounter
 
     }
 
-
-    /**
-     * 
-     */
     public function count()
     {
 
@@ -233,16 +224,14 @@ class SmartCounter
 
     }
 
-    // Raw statistics
+    // Return JSON
     public function rawStats()
     {
 
-        return $this->statistics;
+        return json_encode( $this->statistics );
 
     }
 
 }
-
-
 
 ?>
