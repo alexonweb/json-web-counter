@@ -38,9 +38,9 @@ class SmartCounter
     private function getStatsData()
     {
 
-        if ( file_exists( $this->statisticsFilePath ) ) {
+        if (file_exists($this->statisticsFilePath)) {
 
-            $this->statistics = json_decode( file_get_contents($this->statisticsFilePath), false );
+            $this->statistics = json_decode(file_get_contents($this->statisticsFilePath), false);
 
         } else {
 
@@ -82,7 +82,7 @@ class SmartCounter
      * 
      * return Array 
      */
-    private function subsequence ( $sq )
+    private function subsequence($sq)
     {
 
         $startdate = new DateTime($this->statistics->date);
@@ -133,7 +133,7 @@ class SmartCounter
         foreach ($hh as $h) {
 
             $this->statistics->common->$h = 
-                $this->subsequence( $this->statistics->common->$h );
+                $this->subsequence($this->statistics->common->$h);
 
         }
 
@@ -146,9 +146,9 @@ class SmartCounter
 
         $this->statistics->common->hits = $this->addTolastOne( $this->statistics->common->hits );
         
-        if ( $this->isNewVisitor() ) {
+        if ($this->isNewVisitor()) {
 
-            $this->statistics->common->hosts = $this->addTolastOne( $this->statistics->common->hosts );
+            $this->statistics->common->hosts = $this->addTolastOne($this->statistics->common->hosts);
 
         }
 
@@ -220,7 +220,7 @@ class SmartCounter
     private function putJSONtoFile()
     {
 
-        file_put_contents( $this->statisticsFilePath, json_encode($this->statistics) );
+        file_put_contents($this->statisticsFilePath, json_encode($this->statistics));
 
     }
 
@@ -228,7 +228,7 @@ class SmartCounter
     public function rawStats()
     {
 
-        return json_encode( $this->statistics );
+        return json_encode($this->statistics);
 
     }
 
