@@ -194,7 +194,7 @@ class SmartCounter
     private function getCookie()
     {
 
-        if ( isset($_COOKIE["smartcounter"]) ) {
+        if (isset($_COOKIE["smartcounter"])) {
 
             $datecookie = $_COOKIE["smartcounter"];
 
