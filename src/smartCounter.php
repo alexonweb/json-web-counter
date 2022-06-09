@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.2.5.1 alpha
+ * SmartCounter 0.2.6 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -163,8 +163,8 @@ class SmartCounter
 
         $this->getCookie();
 
-        if ($this->cookiedate !== null) {
-            
+        if (isset($this->cookiedate)) {
+
             if ( $this->daysBefore($this->cookiedate) != 0) {
 
                 return true;
@@ -231,6 +231,7 @@ class SmartCounter
         return json_encode( $this->statistics );
 
     }
+
 
 }
 
