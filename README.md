@@ -36,16 +36,8 @@ Simple example of output data with __rawStats()__ method
 {
    "date":"2022-05-26",
    "common":{
-      "hits":[
-         11,
-         0,
-         12
-      ],
-      "hosts":[
-         1,
-         0,
-         1
-      ]
+      "hits":[11,0,12],
+      "hosts":[1,0,1]
    }
 }
 ```

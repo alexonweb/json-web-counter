@@ -6,6 +6,18 @@ $counter = new FriendlyWeb\SmartCounter();
 
 $counter->count();
 
-print_r($counter->rawStats());
-
 ?>
+
+<pre>
+    <?php
+
+       // print_r( $counter->rawStats() );
+
+
+
+       // echo $counter->getSq('50', 'hits');
+
+    ?>
+</pre>
+
+
