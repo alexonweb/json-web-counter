@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.2.6 alpha
+ * SmartCounter 0.3 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -15,7 +15,11 @@ use DateTime;
 class SmartCounter
 {
 
-    private $statisticsFilePath = 'user/smartcounter.json';
+    private $statisticsFilePath = 'user/smartcounter6.json';
+
+    private $statistics = null; // перечислить все "переменные" ? 
+    private $uri = null; // 
+    private $pagekey = null; // 
 
     public function __construct()
     {
@@ -23,6 +27,10 @@ class SmartCounter
         $this->setCurrentDate();
 
         $this->getStatsData();
+
+        $this->setURI(); //
+
+        $this->setPageKey(); // 
 
         $this->updateStatsData();
 
@@ -44,7 +52,7 @@ class SmartCounter
 
         } else {
 
-            $this->statistics = (object) $this->createSkeleton();
+            $this->statistics = (object)$this->createSkeleton();
 
         }
 
@@ -54,24 +62,51 @@ class SmartCounter
      * Understanding Skeleton
      * 
      * date - date of last editing data file
-     * common
+     * pages - array of objects (statistics by URI pages)
+     *  uri  -  resource identifier
      *  hits -  array as a sequence of days
      *  hosts - array as a sequence of days
      */
     private function createSkeleton()
     {
 
-        $sq = array(0);
-
-        $common = array( 
-            'hits'      => $sq,
-            'hosts'     => $sq);
+        $pages[] = $this->smallSkeleton();
 
         $skeleton = array(
             'date'      => $this->datenow->format('Y-m-d'),
-            'common'    => (object)$common);
+            'pages'    => $pages);
 
         return $skeleton;
+
+    }
+
+    // Retrun Object
+    private function smallSkeleton($uri = 'index')
+    {
+        $sq = array(0);
+        $empty = array(
+            'uri' => $uri,
+            'hits'=>$sq,
+            'hosts'=>$sq
+        );
+
+        return (object)$empty;
+
+    }
+
+    // Set current key of pages array in $this->statistics by current URI
+    private function setPageKey()
+    {
+
+        foreach ($this->statistics->pages as $key => $page) {
+
+            if ($page->uri == $this->uri) {
+
+                $this->pagekey = $key;
+
+            }
+
+        }
 
     }
 
@@ -112,7 +147,7 @@ class SmartCounter
 
     }
 
-    public function addTolastOne($sq) 
+    private function addTolastOne($sq) 
     {
 
         end($sq);
@@ -125,15 +160,34 @@ class SmartCounter
 
     }
 
+    private function addPage()
+    {
+
+        $this->statistics->pages[] = $this->smallSkeleton($this->uri);
+
+    }
+
     private function updateStatsData()
     {
 
-        $hh = array("hits", "hosts");
+        if ($this->pagekey === null) {
 
-        foreach ($hh as $h) {
+            $this->addPage();
 
-            $this->statistics->common->$h = 
-                $this->subsequence($this->statistics->common->$h);
+            $this->setPageKey();
+
+        }
+
+        if ($this->pagekey !== null) {
+
+            $hh = array("hits", "hosts");
+
+            foreach ($hh as $h) {
+
+                $this->statistics->pages[$this->pagekey]->$h = 
+                    $this->subsequence($this->statistics->pages[$this->pagekey]->$h);
+
+            }
 
         }
 
@@ -144,11 +198,11 @@ class SmartCounter
     public function count()
     {
 
-        $this->statistics->common->hits = $this->addTolastOne( $this->statistics->common->hits );
+        $this->statistics->pages[$this->pagekey]->hits = $this->addTolastOne($this->statistics->pages[$this->pagekey]->hits);
         
         if ($this->isNewVisitor()) {
 
-            $this->statistics->common->hosts = $this->addTolastOne($this->statistics->common->hosts);
+            $this->statistics->pages[$this->pagekey]->hosts = $this->addTolastOne($this->statistics->pages[$this->pagekey]->hosts);
 
         }
 
@@ -232,6 +286,31 @@ class SmartCounter
 
     }
 
+    private function getURI()
+    {
+
+        $uri = urldecode($_SERVER['REQUEST_URI']);
+
+        $uri = substr($uri, 1); // Remove slash at the start of the line
+
+        if ($uri == '') {
+
+            return 'index';
+
+        } else {
+
+            return $uri;
+
+        }
+
+    }
+
+    private function setURI()
+    {
+
+        $this->uri = $this->getURI();
+
+    }
 
 }
 
