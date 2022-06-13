@@ -17,9 +17,9 @@ class SmartCounter
 
     private $statisticsFilePath = 'user/smartcounter6.json';
 
-    private $statistics = null; // перечислить все "переменные" ? 
-    private $uri = null; // 
-    private $pagekey = null; // 
+    private $statistics = null;
+    private $uri = null;
+    private $pagekey = null;
 
     public function __construct()
     {
@@ -28,9 +28,9 @@ class SmartCounter
 
         $this->getStatsData();
 
-        $this->setURI(); //
+        $this->setURI();
 
-        $this->setPageKey(); // 
+        $this->setPageKey();
 
         $this->updateStatsData();
 
