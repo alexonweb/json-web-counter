@@ -15,8 +15,7 @@ use DateTime;
 class SmartCounter
 {
 
-    private $statisticsFilePath = 'user/smartcounter6.json';
-
+    private $statisticsFilePath = 'user/smartcounter.json';
     private $statistics = null;
     private $uri = null;
     private $pagekey = null;
@@ -80,7 +79,6 @@ class SmartCounter
 
     }
 
-    // Retrun Object
     private function smallSkeleton($uri = 'index')
     {
         $sq = array(0);
@@ -178,14 +176,13 @@ class SmartCounter
 
         }
 
-        if ($this->pagekey !== null) {
+        foreach ($this->statistics->pages as $key => $page) {
 
             $hh = array("hits", "hosts");
 
             foreach ($hh as $h) {
 
-                $this->statistics->pages[$this->pagekey]->$h = 
-                    $this->subsequence($this->statistics->pages[$this->pagekey]->$h);
+                $this->statistics->pages[$key]->$h = $this->subsequence($page->$h);
 
             }
 
@@ -278,7 +275,6 @@ class SmartCounter
 
     }
 
-    // Return JSON
     public function rawStats()
     {
 
