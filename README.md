@@ -38,12 +38,12 @@ Simple example of output data with __rawStats()__ method
 			"hits":[
 				0,
 				0,
-            0
+            			0
 			],
 			"hosts":[
 				0,
 				0,
-            0
+            			0
 			]
 		},
 		{
@@ -51,12 +51,12 @@ Simple example of output data with __rawStats()__ method
 			"hits":[
 				5,
 				3,
-            1
+            			1
 			],
 			"hosts":[
 				0,
 				1,
-            2
+            			2
 			]
 		}
 	]
