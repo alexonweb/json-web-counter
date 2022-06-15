@@ -3,9 +3,6 @@
 Simple running tally of the number of visits a webpage has received using JSON.
 Good for file-flat CMS.
 
-
-
-
 ## Usage
 
 Specify the directory for storing data by changing the property __statisticsFilePath__ in `SmartCounter` class
@@ -15,7 +12,7 @@ Specify the directory for storing data by changing the property __statisticsFile
 Define a Class
 
 ```
-require 'src/smartCounter.php';
+require 'src/SmartCounter.php';
 
 $counter = new FriendlyWeb\SmartCounter();
 ```
@@ -34,19 +31,41 @@ Simple example of output data with __rawStats()__ method
 
 ```
 {
-   "date":"2022-05-26",
-   "common":{
-      "hits":[11,0,12],
-      "hosts":[1,0,1]
-   }
+	"date":"2022-06-15",
+	"pages":[
+		{
+			"uri":"index",
+			"hits":[
+				0,
+				0,
+            0
+			],
+			"hosts":[
+				0,
+				0,
+            0
+			]
+		},
+		{
+			"uri":"examples.php",
+			"hits":[
+				5,
+				3,
+            1
+			],
+			"hosts":[
+				0,
+				1,
+            2
+			]
+		}
+	]
 }
 ```
 
 ## Idea
 
-I only need to know how many hosts and hits visit the site each day. Most website traffic counters store a large amount of data (including IP, exact time including milliseconds, browser, etc.). I was only interested in the sequence of visits per day. 
-
-SmartCounter counts website traffic (hits and hosts) using a __sequence of days__. The sequence is written from the date which is stored in the JSON file.
+SmartCounter counts website traffic (hits and hosts) using a __sequence of days__. The sequence is written from the date which is stored in the JSON file. Most website traffic counters store a large amount of data (including IP, exact time including milliseconds, browser, etc.). SmartCounter only store sequence of visits per day by the URI (URL).
 
 ## Cookie
 

@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.3 alpha
+ * SmartCounter 0.3.1 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -17,8 +17,8 @@ class SmartCounter
 
     private $statisticsFilePath = 'user/smartcounter.json';
     private $statistics = null;
-    private $uri = null;
     private $pagekey = null;
+    private $uri = null;
 
     public function __construct()
     {
@@ -81,7 +81,9 @@ class SmartCounter
 
     private function smallSkeleton($uri = 'index')
     {
+
         $sq = array(0);
+
         $empty = array(
             'uri' => $uri,
             'hits'=>$sq,
@@ -275,13 +277,6 @@ class SmartCounter
 
     }
 
-    public function rawStats()
-    {
-
-        return json_encode($this->statistics);
-
-    }
-
     private function getURI()
     {
 
@@ -305,6 +300,13 @@ class SmartCounter
     {
 
         $this->uri = $this->getURI();
+
+    }
+
+    public function rawStats()
+    {
+
+        return json_encode($this->statistics);
 
     }
 
