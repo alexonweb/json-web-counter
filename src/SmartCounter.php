@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.4 alpha
+ * SmartCounter 0.4.1 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -65,6 +65,7 @@ class SmartCounter
      *  uri  -  resource identifier
      *  hits -  array as a sequence of days
      *  hosts - array as a sequence of days
+     *  unique - number of visitors without cookies
      */
     private function createSkeleton()
     {
@@ -339,7 +340,8 @@ class SmartCounter
 
     }
 
-    // 
+    // Method return total hits (visits) for all pages
+    // if ($unique = true) return total hosts for all pages
     public function total($unique = false)
     {
 
@@ -349,7 +351,8 @@ class SmartCounter
 
             if ($unique) {
 
-                $total = (isset($page->unique) ? $total + $page->unique : false );
+                $total += $page->unique;
+                // $total = (isset($page->unique) ? $total + $page->unique : false );
 
             } else {
 
