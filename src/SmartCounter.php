@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.3.1 alpha
+ * SmartCounter 0.4 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -87,7 +87,8 @@ class SmartCounter
         $empty = array(
             'uri' => $uri,
             'hits'=>$sq,
-            'hosts'=>$sq
+            'hosts'=>$sq,
+            'unique'=>0
         );
 
         return (object)$empty;
@@ -194,20 +195,20 @@ class SmartCounter
 
     }
 
-    public function count()
+    private function isUniqueVisitor()
     {
 
-        $this->statistics->pages[$this->pagekey]->hits = $this->addTolastOne($this->statistics->pages[$this->pagekey]->hits);
-        
-        if ($this->isNewVisitor()) {
+        $this->getCookie();
 
-            $this->statistics->pages[$this->pagekey]->hosts = $this->addTolastOne($this->statistics->pages[$this->pagekey]->hosts);
+        if (isset($this->cookiedate)) {
+        
+            return false;
+
+        } else {
+
+            return true;
 
         }
-
-        $this->setCookie();
-
-        $this->putJSONtoFile();
 
     }
 
@@ -218,7 +219,7 @@ class SmartCounter
 
         if (isset($this->cookiedate)) {
 
-            if ( $this->daysBefore($this->cookiedate) != 0) {
+            if ($this->daysBefore($this->cookiedate) != 0) {
 
                 return true;
 
@@ -303,10 +304,70 @@ class SmartCounter
 
     }
 
+    // Adds hits and hosts to statistics JSON file and sets cookies
+    public function count()
+    {
+
+        $this->statistics->pages[$this->pagekey]->hits = 
+            $this->addTolastOne($this->statistics->pages[$this->pagekey]->hits);
+        
+        if ($this->isNewVisitor()) {
+
+            $this->statistics->pages[$this->pagekey]->hosts = 
+                $this->addTolastOne($this->statistics->pages[$this->pagekey]->hosts);
+
+        }
+
+        if ($this->isUniqueVisitor()) {
+
+            $this->statistics->pages[$this->pagekey]->unique++;
+
+        }
+
+        $this->setCookie();
+
+        $this->putJSONtoFile();
+
+    }
+
+    // Method for debugging
+    // retrun JSON current statistics data
     public function rawStats()
     {
 
         return json_encode($this->statistics);
+
+    }
+
+    // 
+    public function total($unique = false)
+    {
+
+        $total = 0;
+
+        foreach ($this->statistics->pages as $page) {
+
+            if ($unique) {
+
+                $total = (isset($page->unique) ? $total + $page->unique : false );
+
+            } else {
+
+                $total += array_sum($page->hits);
+
+            }
+            
+        }
+
+        return $total;
+
+    }
+
+    // 
+    public function hitsThisPage()
+    {
+
+        return array_sum($this->statistics->pages[$this->pagekey]->hits);
 
     }
 
