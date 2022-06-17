@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.4.1 alpha
+ * SmartCounter 0.4.2 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -340,37 +340,49 @@ class SmartCounter
 
     }
 
-    // Method return total hits (visits) for all pages
-    // if ($unique = true) return total hosts for all pages
-    public function total($unique = false)
+    public function views($total = true)
     {
 
-        $total = 0;
+        if ($total) {
 
-        foreach ($this->statistics->pages as $page) {
+            $total = 0;
 
-            if ($unique) {
-
-                $total += $page->unique;
-                // $total = (isset($page->unique) ? $total + $page->unique : false );
-
-            } else {
+            foreach ($this->statistics->pages as $page) {
 
                 $total += array_sum($page->hits);
-
+    
             }
-            
-        }
 
-        return $total;
+            return $total;
+
+        } else {
+
+             return array_sum($this->statistics->pages[$this->pagekey]->hits);
+
+        }
 
     }
 
-    // 
-    public function hitsThisPage()
+    public function visits($total = true)
     {
 
-        return array_sum($this->statistics->pages[$this->pagekey]->hits);
+        if ($total) {
+
+            $total = 0;
+
+            foreach ($this->statistics->pages as $page) {
+    
+                $total += $page->unique;
+    
+            }
+
+            return $total;
+
+        } else {
+
+            return $this->statistics->pages[$this->pagekey]->unique;
+
+        }
 
     }
 
