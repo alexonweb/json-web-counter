@@ -21,7 +21,23 @@ To count visitors use __count()__ method
 
 ```$counter->count();```
 
-To output statistics use __rawStats()__ method
+Output total views of all pages use __views()__ method
+
+```$counter->views()```
+
+of current page use param __views(true)__
+
+```$counter->views(true)```
+
+Output visits of all pages use __visits()__ method 
+
+```$counter->visits()```
+
+same as for __views()__ use param for current page
+
+```$counter->visits(true)```
+
+To output current statistics data in JSON use __rawStats()__ method
 
 ```$counter->rawStats();```
 
@@ -31,37 +47,44 @@ Simple example of output data with __rawStats()__ method
 
 ```
 {
-	"date":"2022-06-15",
-	"pages":[
-		{
-			"uri":"index",
-			"hits":[
-				0,
-				0,
-            			0
-			],
-			"hosts":[
-				0,
-				0,
-            			0
-			]
-		},
-		{
-			"uri":"examples.php",
-			"hits":[
-				5,
-				3,
-            			1
-			],
-			"hosts":[
-				0,
-				1,
-            			2
-			]
-		}
-	]
+    "date":"2022-06-17",
+    "pages":[
+        {
+            "uri":"index",
+            "hits":[
+                0,
+                0,
+                0,
+                0
+            ],
+            "hosts":[
+                0,
+                0,
+                0,
+                0
+            ],
+            "unique":0
+        },
+        {
+            "uri":"examples.php",
+            "hits":[
+                13,
+                0,
+                0,
+                1
+            ],
+            "hosts":[
+                1,
+                0,
+                0,
+                0
+            ],
+            "unique":1
+        }
+    ]
 }
 ```
+
 
 ## Idea
 
