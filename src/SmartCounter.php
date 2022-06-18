@@ -17,6 +17,7 @@ class SmartCounter
 
     private $statisticsFilePath = 'user/smartcounter.json';
     private $statistics = null;
+    private $cookiedate = null;
     private $pagekey = null;
     private $uri = null;
 
@@ -26,6 +27,8 @@ class SmartCounter
         $this->setCurrentDate();
 
         $this->getStatsData();
+
+        $this->getCookie();
 
         $this->setURI();
 
@@ -138,14 +141,12 @@ class SmartCounter
 
     /**
      * Days before the CURRENT date
-     * $lastdate - DateTime object
+     * $startdate - DateTime object
      */ 
     private function daysBefore($startdate)
     {
 
-        $days = $this->datenow->diff($startdate)->format("%a");
-
-        return $days;
+        return $this->datenow->diff($startdate)->format("%a");
 
     }
 
@@ -196,37 +197,25 @@ class SmartCounter
 
     }
 
-    private function isUniqueVisitor()
+    private function issetCookie()
     {
 
-        $this->getCookie();
-
-        if (isset($this->cookiedate)) {
-        
-            return false;
-
-        } else {
-
-            return true;
-
-        }
+        return (isset($this->cookiedate)) ? true : false;
 
     }
 
     private function isNewVisitor()
     {
 
-        $this->getCookie();
+        if ($this->issetCookie()) {
 
-        if (isset($this->cookiedate)) {
+            if ($this->daysBefore($this->cookiedate) == 0) {
 
-            if ($this->daysBefore($this->cookiedate) != 0) {
-
-                return true;
+                return false;
 
             } else {
 
-                return false;
+                return true;
             }
 
         } else {
@@ -311,7 +300,7 @@ class SmartCounter
 
         $this->statistics->pages[$this->pagekey]->hits = 
             $this->addTolastOne($this->statistics->pages[$this->pagekey]->hits);
-        
+
         if ($this->isNewVisitor()) {
 
             $this->statistics->pages[$this->pagekey]->hosts = 
@@ -319,7 +308,7 @@ class SmartCounter
 
         }
 
-        if ($this->isUniqueVisitor()) {
+        if (!$this->issetCookie()) {
 
             $this->statistics->pages[$this->pagekey]->unique++;
 
