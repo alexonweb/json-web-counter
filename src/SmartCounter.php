@@ -196,6 +196,15 @@ class SmartCounter
 
     }
 
+    /*
+    объединить методы 
+isUniqueVisitor
+isNewVisitor
+
+
+
+*/
+
     private function isUniqueVisitor()
     {
 

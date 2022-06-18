@@ -23,23 +23,23 @@ To count visitors use __count()__ method
 
 Output total views of all pages use __views()__ method
 
-```$counter->views()```
+```echo $counter->views()```
 
 of current page use param __views(true)__
 
-```$counter->views(true)```
+```echo $counter->views(true)```
 
 Output visits of all pages use __visits()__ method 
 
-```$counter->visits()```
+```echo $counter->visits()```
 
 same as for __views()__ use param for current page
 
-```$counter->visits(true)```
+```echo $counter->visits(true)```
 
 To output current statistics data in JSON use __rawStats()__ method
 
-```$counter->rawStats();```
+```print_r($counter->rawStats())```
 
 ## Examples
 
