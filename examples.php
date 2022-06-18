@@ -19,5 +19,5 @@ of this page <?php echo $counter->visits(true) ?>
 <h2>Current statistics data</h2>
 
 <code>
-<?php echo $counter->rawStats() ?>
+<?php print_r($counter->rawStats()) ?>
 </code>
