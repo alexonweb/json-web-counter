@@ -10,14 +10,20 @@ $counter->count();
 
 <h1>SmartCounter exapmles</h1>
 
-<p>Total views <?php echo $counter->views() ?> 
-of this page <?php echo $counter->views(true) ?>.
+<h2>Total views and visits</h2>
 
-<p>Total visits <?php echo $counter->visits() ?> 
-of this page <?php echo $counter->visits(true) ?>
+<p>Views: <?php echo $counter->views() ?>
 
-<h2>Current statistics data</h2>
+<p>Visits: <?php echo $counter->visits() ?>
 
-<code>
+<h2>This page</h2>
+
+<p>Views: <?php echo $counter->views(true) ?>
+
+<p>Visits: <?php echo $counter->visits(true) ?>
+
+<h2>Current statistics data file</h2>
+
+<pre>
 <?php print_r($counter->rawStats()) ?>
-</code>
+</pre>
