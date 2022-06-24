@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.4.3 alpha
+ * SmartCounter 0.4.5 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -103,11 +103,18 @@ class SmartCounter
     private function setPageKey()
     {
 
+        $this->pagekey = $this->findPageKey($this->uri);
+
+    }
+
+    private function findPageKey($uri)
+    {
+
         foreach ($this->statistics->pages as $key => $page) {
 
-            if ($page->uri == $this->uri) {
+            if ($page->uri == $uri) {
 
-                $this->pagekey = $key;
+               return $key;
 
             }
 
@@ -122,10 +129,10 @@ class SmartCounter
      * 
      * return Array 
      */
-    private function subsequence($sq)
+    private function subsequence($sq, $startdate)
     {
 
-        $startdate = new DateTime($this->statistics->date);
+        $startdate = new DateTime($startdate);
 
         $days = $this->daysBefore($startdate);
 
@@ -170,6 +177,33 @@ class SmartCounter
 
     }
 
+
+    private function updateSubsequences($key, $date)
+    {
+
+        $hh = array("hits", "hosts");
+
+        foreach ($hh as $h) {
+
+            $this->statistics->pages[$key]->$h = 
+                $this->subsequence($this->statistics->pages[$key]->$h, $date);
+
+        }
+
+    }
+
+    // Retrun the date when the statistics began to be taken
+    private function absoluteDate()
+    {
+
+        $pagekey = $this->findPageKey("index");
+
+        $dayspast = count($this->statistics->pages[$pagekey]->hits);
+
+        return date('Y-m-d', strtotime('-' . --$dayspast . ' days'));
+
+    }
+
     private function updateStatsData()
     {
 
@@ -179,17 +213,13 @@ class SmartCounter
 
             $this->setPageKey();
 
+            $this->updateSubsequences($this->pagekey, $this->absoluteDate());
+
         }
 
         foreach ($this->statistics->pages as $key => $page) {
 
-            $hh = array("hits", "hosts");
-
-            foreach ($hh as $h) {
-
-                $this->statistics->pages[$key]->$h = $this->subsequence($page->$h);
-
-            }
+            $this->updateSubsequences($key, $this->statistics->date);
 
         }
 
