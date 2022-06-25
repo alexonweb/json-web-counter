@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.4.5.1 alpha
+ * SmartCounter 0.4.5.2 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -130,7 +130,7 @@ class SmartCounter
      * 
      * return Array 
      */
-    private function subsequence($sq, $startdate)
+    private function sequences($sq, $startdate)
     {
 
         $startdate = new DateTime($startdate);
@@ -171,7 +171,7 @@ class SmartCounter
 
     }
 
-    private function updateSubsequences($key, $date)
+    private function updateSequences($key, $date)
     {
 
         $hh = array("hits", "hosts");
@@ -179,7 +179,7 @@ class SmartCounter
         foreach ($hh as $h) {
 
             $this->statistics->pages[$key]->$h = 
-                $this->subsequence($this->statistics->pages[$key]->$h, $date);
+                $this->sequences($this->statistics->pages[$key]->$h, $date);
 
         }
 
@@ -204,7 +204,18 @@ class SmartCounter
 
         $this->setPageKey();
 
-        $this->updateSubsequences($this->pagekey, $this->absoluteDate());
+        $this->updateSequences($this->pagekey, $this->absoluteDate());
+
+    }
+
+    private function updateSequencesForAllPages()
+    {
+
+        foreach ($this->statistics->pages as $key => $page) {
+
+            $this->updateSequences($key, $this->statistics->date);
+
+        }
 
     }
 
@@ -214,11 +225,7 @@ class SmartCounter
 
         ($this->pagekey === null) ? $this->addPage() : false;
 
-        foreach ($this->statistics->pages as $key => $page) {
-
-            $this->updateSubsequences($key, $this->statistics->date);
-
-        }
+        $this->updateSequencesForAllPages();
 
         $this->statistics->date = $this->datenow->format('Y-m-d');
 
