@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.4.5 alpha
+ * SmartCounter 0.4.5.1 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -126,6 +126,7 @@ class SmartCounter
      * Fill 0 values of the days before the current date
      * 
      * $sq - array
+     * $startdate - what date to start counting
      * 
      * return Array 
      */
@@ -170,14 +171,6 @@ class SmartCounter
 
     }
 
-    private function addPage()
-    {
-
-        $this->statistics->pages[] = $this->smallSkeleton($this->uri);
-
-    }
-
-
     private function updateSubsequences($key, $date)
     {
 
@@ -204,18 +197,22 @@ class SmartCounter
 
     }
 
+    private function addPage()
+    {
+
+        $this->statistics->pages[] = $this->smallSkeleton($this->uri);
+
+        $this->setPageKey();
+
+        $this->updateSubsequences($this->pagekey, $this->absoluteDate());
+
+    }
+
+    // Actualize stats
     private function updateStatsData()
     {
 
-        if ($this->pagekey === null) {
-
-            $this->addPage();
-
-            $this->setPageKey();
-
-            $this->updateSubsequences($this->pagekey, $this->absoluteDate());
-
-        }
+        ($this->pagekey === null) ? $this->addPage() : false;
 
         foreach ($this->statistics->pages as $key => $page) {
 
