@@ -1,6 +1,6 @@
 <?php
 /**
- * SmartCounter 0.4.5.2 alpha
+ * SmartCounter 0.4.5.3 alpha
  * 
  * Alexander Dalle dalle@criptext.com 
  * 
@@ -15,8 +15,8 @@ use DateTime;
 class SmartCounter
 {
 
-    private $statisticsFilePath = 'user/smartcounter.json';
-    private $statistics = null;
+    private $statisticsFilePath = 'user/smartcounter/pages.json';
+    var $statistics = null;
     private $cookiedate = null;
     private $pagekey = null;
     private $uri = null;
