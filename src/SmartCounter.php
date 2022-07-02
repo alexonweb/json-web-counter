@@ -18,8 +18,8 @@ class SmartCounter
 
     private $statisticsFilePath = 'user/smartcounter/pages.json';
     var $statistics = null;
+    var $pagekey = null;
     private $cookiedate = null;
-    private $pagekey = null;
     private $uri = null;
 
     public function __construct()
