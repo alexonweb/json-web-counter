@@ -5,7 +5,7 @@ require 'src/SmartCounterView.php';
 
 $counter = new FriendlyWeb\SmartCounter();
 
-$counter->count(); // count this page
+$counter->count();
 
 $counterview = new FriendlyWeb\SmartCounterView();
 
