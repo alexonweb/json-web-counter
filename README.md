@@ -21,10 +21,6 @@ To count visitors use __count()__ method
 
 ```$counter->count();```
 
-To see stats use SmartCounterView class.
-
-```$counter = new FriendlyWeb\SmartCounterView();```
-
 Output total views of all pages use __views()__ method
 
 ```echo $counter->views()```
