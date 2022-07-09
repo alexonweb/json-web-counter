@@ -1,13 +1,10 @@
 <?php
 
 require 'src/SmartCounter.php';
-require 'src/SmartCounterView.php';
 
 $counter = new FriendlyWeb\SmartCounter();
 
 $counter->count();
-
-$counterview = new FriendlyWeb\SmartCounterView();
 
 ?>
 
@@ -23,13 +20,13 @@ $counterview = new FriendlyWeb\SmartCounterView();
     <tbody>
     <tr>
         <td>This page</td>
-        <td><?php echo $counterview->visits(true) ?></td>
-        <td><?php echo $counterview->views(true) ?></td>
+        <td><?php echo $counter->visits(true) ?></td>
+        <td><?php echo $counter->views(true) ?></td>
     </tr>
     <tr>
         <td>Total</td>
-        <td><?php echo $counterview->visits() ?></td>
-        <td><?php echo $counterview->views() ?></td>
+        <td><?php echo $counter->visits() ?></td>
+        <td><?php echo $counter->views() ?></td>
     </tr>
     </tbody>
 </table>

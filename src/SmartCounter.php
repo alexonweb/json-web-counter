@@ -17,8 +17,8 @@ class SmartCounter
 {
 
     private $statisticsFilePath = 'user/smartcounter/pages.json';
-    var $statistics = null;
-    var $pagekey = null;
+    private $statistics = null;
+    private $pagekey = null;
     private $cookiedate = null;
     private $uri = null;
 
@@ -352,6 +352,73 @@ class SmartCounter
         $this->setCookie();
 
         $this->putJSONtoFile();
+
+    }
+
+    // Method for debugging
+    // retrun JSON current statistics data
+    public function rawStats()
+    {
+
+        return json_encode($this->statistics);
+
+    }
+
+    // Return views (hits) of all pages total or 
+    // current page if $thispage is true
+    public function views($thispage = false)
+    {
+
+        if ($thispage) {
+
+            return array_sum($this->statistics->pages[$this->pagekey]->hits);
+
+        } else {
+
+            return $this->total(false);
+
+        }
+
+    }
+
+    // Return total visits (unique)
+    public function visits($thispage = false)
+    {
+
+        if ($thispage) {
+
+            return $this->statistics->pages[$this->pagekey]->unique;
+
+        } else {
+
+            return $this->total(true);
+
+        }
+
+    }
+
+    // Method for counting the total number of views or visits
+    // $unique = true - for visits 
+    // $unique = false - for views
+    private function total($unique) {
+
+        $total = 0;
+
+        foreach ($this->statistics->pages as $page) {
+    
+            if ($unique) {
+
+                $total += $page->unique;
+
+            } else {
+    
+                $total += array_sum($page->hits);
+    
+            }
+
+        }
+
+        return $total;
 
     }
 
